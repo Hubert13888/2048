@@ -1,0 +1,35 @@
+main *:not(style) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+$gameBcg: #5C9099;
+
+.game {
+    flex-direction: column;
+    background-color: $gameBcg;
+    border-radius: 5%;
+    padding: 2vw;
+}
+.game_field {
+    border: $gameBcg solid 6px;
+    position: relative;
+    max-width: 110px;
+    max-height: 110px;
+}
+.game_tile {
+    position: absolute;
+    background-color: #BFD5D9;
+    width: 100%;
+    height: 100%;
+    border-radius: 3%;
+    color: #3d666d;
+    font-size: 23px;
+
+    transform: -100px;
+    transition: -100ms;
+}
+.tile_0 {
+    background-color: #81ACB1;
+}
