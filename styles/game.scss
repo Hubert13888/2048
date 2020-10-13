@@ -15,21 +15,29 @@ $gameBcg: #5C9099;
 .game_field {
     border: $gameBcg solid 6px;
     position: relative;
-    max-width: 110px;
-    max-height: 110px;
 }
 .game_tile {
+    opacity: 0;
     position: absolute;
+    z-index: 2;
     background-color: #BFD5D9;
     width: 100%;
     height: 100%;
     border-radius: 3%;
     color: #3d666d;
     font-size: 23px;
-
-    transform: -100px;
-    transition: -100ms;
+    transition: 
+            opacity 0s,
+            transform 0s;
 }
+.show {
+    transition: opacity 500ms;
+}
+.show_no_transition {
+    opacity: 100%;
+}
+
 .tile_0 {
+    z-index: 1 !important;
     background-color: #81ACB1;
 }
