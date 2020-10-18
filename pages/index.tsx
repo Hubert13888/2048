@@ -1,36 +1,227 @@
 import React, {Component, useState, useEffect, useRef, useImperativeHandle} from 'react'
 import ClassNames from 'classnames'
 
-export default function Home() {
-  const [pos, setPos] = useState('game-4x4')
-  const gameRef = useRef(null)
+interface StateMenu {
+  menuPosition: string,
+  game: Game[],
+  inputs: {
+    width: number,
+    height: number,
+    content_of_new_1: number, 
+    content_of_new_2: number, 
+    number_of_new: number, 
+    winning_tile: number
+  },
+  errors: string[]
+}
 
-  return (
-    <main>
-      {pos == 'main-menu' ? <ul>
-        <li onClick={e => {
-          setPos('game-4x4')
-      }}>Standard 4x4</li>
-        <li>Credits</li>
-      </ul> : void(0)} 
-      {pos == 'game-4x4' ? <ul>
-        <button onClick={e => {
-          setPos('main-menu')
-        }}>Return</button>
+export default class Home extends Component {
+  state : StateMenu = {
+    menuPosition: 'customize',
+    game: [],
+    inputs: {
+      width: 4,
+      height: 4,
+      content_of_new_1: 2, 
+      content_of_new_2: 4, 
+      number_of_new: 1, 
+      winning_tile: 2048
+    },
+    errors: []
+  }
+  deleteGames() {
+    this.setState((prev: StateMenu) => ({
+      game: [
+        ...prev.game.map(() => {return void(0)})
+      ]
+    }))
+  }
+  createGame(width: number = 4, 
+             height: number = 4, 
+             content_of_new_1: number = 2, 
+             content_of_new_2: number = 4, 
+             number_of_new: number = 1, 
+             winning_tile: number = 2048) {
+    this.setState((prev : StateMenu) => ({
+      menuPosition: 'new-game', game: [
+        ...prev.game,
+        <Game width={width} 
+        height={height} 
+        content_of_new_1={content_of_new_1}
+        content_of_new_2={content_of_new_2}
+        number_of_new={number_of_new}
+        winning_tile={winning_tile}
+        gameOver={() => {alert("Game Over")}} win={() => {alert("You have won!")}} />
+      ]
+    }))
+  }
 
-        <button onClick={e => {
-          gameRef.current.newGame()
-        }}>Reset</button>
+generateInput(name: string) {
+  return(<input type="text" name={name} value={this.state.inputs[name]} onChange={e => {
+    e.persist()
+    this.setState((prev : StateMenu) => ({
+      inputs: {
+        ...prev.inputs,
+        [name]: e.target.value
+      }
+    }))
+  }}/>)
+}
 
-        <Game width={4} height={4} ref={gameRef}/>
-      </ul> : void(0)}
-    </main>
-  )
+  render() {
+    return (<main>
+      
+      <button className={ClassNames({
+        returnButton: true,
+        top: true,
+        hide_menu_routes: true,
+        show_menu_routes: this.state.menuPosition != 'main-menu'
+      })} onClick={() => this.setState({menuPosition: 'main-menu'})}>Back</button>
+
+      <div className={ClassNames({
+        menu: true,
+        hide_menu_routes: true,
+        show_menu_routes: this.state.menuPosition == 'main-menu'
+      })}>
+        <p>Welcome to 2048! In this game your task is to connect tiles with same number and get to 2048 by moving the all the tiles on the board</p>
+        <div className="main_menu">
+          <span><title>2048</title></span>
+
+          <p onClick={() =>{
+            this.createGame()
+          }}>Classic 2048 4x4</p>
+
+          <p onClick={() =>{
+            this.createGame(4, 5, -2, 2, 1, 512)
+          }}>Negative 512 4x5</p>
+
+          <p onClick={() =>{
+            this.setState((prev : StateMenu) => ({
+            menuPosition: 'customize'
+          }))}}>Customize</p>
+
+          <p onClick={() => this.setState({
+            menuPosition: 'credits'
+          })}>Credits</p>
+        </div>
+        
+      </div>
+
+      <div className={ClassNames({
+        customize_panel: true,
+        hide_menu_routes: true,
+        show_menu_routes: this.state.menuPosition == 'customize'
+      })}
+      onTransitionEnd={() => {
+
+      }}>
+        <title>Please enter the parameters below to customize your game</title>
+        <form action="" onSubmit={e => {
+          e.preventDefault()
+          let formData = new FormData(e.target)
+          let width, height, content_of_new_1, content_of_new_2, number_of_new, winning_tile, error = []
+          for(let data of formData) {
+            let content = data[1].trim()
+            if(data[0] == "width") {
+              if(!content.match(/^[1-9][0-9]*$/)) error.push("A width of the game should be a number greater than 0")
+              else width = parseInt(content)
+            }
+            else if(data[0] == "height") {
+              if(!content.match(/^[1-9][0-9]*$/)) error.push("A height of the game should be a number greater than 0")
+              else height = parseInt(content)
+            }
+            else if(data[0] == "content_of_new_1") {
+              if(!content.match(/^[-]?(([0-9]*[.])|([1-9]))[0-9]*$/)) error.push("First tile's value is not numeric")
+              else content_of_new_1 = parseFloat(content)
+            }
+            else if(data[0] == "content_of_new_2") {
+              if(!content.match(/^[-]?(([0-9]*[.])|([1-9]))[0-9]*$/)) error.push("Second tile's value is not numeric")
+              else content_of_new_2 = parseFloat(content)
+            }
+            else if(data[0] == "number_of_new") {
+              if(!content.match(/^[1-5]$/)) error.push("Number of new tiles must be greater or equal than 1 and lower than 5")
+              else number_of_new = parseInt(content)
+            }
+            else if(data[0] == "winning_tile") {
+              if(!content.match(/^[-]?[1-9][0-9]*$/)) error.push("A winning tile must be numeric")
+              else winning_tile = parseInt(content)
+            }
+          }
+          if(error[0]) this.setState((prev : StateMenu) => ({
+            errors: [
+              ...error
+            ]
+          }))
+          else this.createGame(width, height, content_of_new_1, content_of_new_2, number_of_new, winning_tile)
+        }}>
+
+          <table>
+            <tbody>
+              <tr>
+                <td className="text_td">Game size</td>
+                <td className="input_td">
+                  {this.generateInput("width")}
+                  {this.generateInput("height")}
+                </td>
+              </tr>
+              <tr>
+                <td className="text_td">Content of new tiles (can be any number)</td>
+                <td className="input_td">
+                  {this.generateInput("content_of_new_1")}
+                  {this.generateInput("content_of_new_2")}
+                </td>
+              </tr>
+              <tr>
+                <td className="text_td">New tiles amount (min 1, max 5)</td>
+                <td className="input_td">{this.generateInput("number_of_new")}</td>
+              </tr>
+              <tr>
+                <td className="text_td">Winning tile</td>
+                <td className="input_td">{this.generateInput("winning_tile")}</td>
+              </tr>
+            </tbody>
+          </table>
+
+            <div className="form_errors">{this.state.errors[0]}</div>
+
+          <button>Play Game</button>
+        </form>
+      </div>
+
+      <div className={ClassNames({
+        hide_menu_routes: true,
+        show_menu_routes: this.state.menuPosition == 'new-game'
+      })}
+      onTransitionEnd={() => {
+        if(this.state.menuPosition != 'new-game') this.deleteGames()
+      }}>
+        {this.state.game}
+      </div>
+
+      <div className={ClassNames({
+        hide_menu_routes: true,
+        show_menu_routes: this.state.menuPosition == 'credits'
+      })}>
+        <title>2048</title>
+        <p>Game made by</p>
+        <a href="http://hubert-siwczynski.000webhostapp.com" target="_blank">Hubert13888</a>
+        <p>using React.</p>
+        <p>Based on the same title game made by Gabriele Cirulli</p>
+      </div>
+    </main>)
+  }
 }
 
 interface Props {
   width: number,
-  height: number
+  height: number,
+  content_of_new_1: number, 
+  content_of_new_2: number, 
+  number_of_new: number, 
+  winning_tile: number,
+  gameOver: () => void,
+  win: () => void,
+  ref?: any
 }
 interface Tile {
   x: number,
@@ -45,40 +236,70 @@ interface Tile {
   isCombined?: boolean,
 }
 interface State {
+  parent?: any,
   width: number,
   height: number,
+  content_of_new_1: number, 
+  content_of_new_2: number, 
+  number_of_new: number, 
+  winning_tile: number,
   amount: number,
+  gameOver: boolean,
+  endFadeInAnimation: boolean,
+  gameOverFunc: () => void,
+  win: boolean,
+  playMore: boolean,
+  winFunc: () => void,
   transitionFinished: boolean,
-  tiles: Tile[]
+  tiles: Tile[][],
+
+  animMutex: boolean
 }
 
 class Game extends Component<Props> {
-  state = {
+  ismounted = false
+
+  state : State = {
     width: 0,
     height: 0,
+    content_of_new_1: 2, 
+    content_of_new_2: 4, 
+    number_of_new: 1, 
+    winning_tile: 2048,
     amount: 0,
+    gameOver: false,
+    endFadeInAnimation: false,
+    gameOverFunc: () => {},
+    win: false,
+    playMore: false,
+    winFunc: () => {},
     transitionFinished: true,
-    tiles: []
+    tiles: [],
+
+    animMutex: false
   }
   constructor(props: Props) {
     super(props)
     
     this.state.width = props.width
     this.state.height = props.height
+    this.state.content_of_new_1 = props.content_of_new_1
+    this.state.content_of_new_2 = props.content_of_new_2
+    this.state.number_of_new = props.number_of_new
+    this.state.winning_tile = props.winning_tile
+    this.state.gameOverFunc = props.gameOver
+    this.state.winFunc = props.win
     this.state.amount = props.width * props.height
-    this.newGame()
   }
-  findTile(x: number, y: number){
-    let tile: Tile
-    for(tile of this.state.tiles)
-      if(x == tile.x && y == tile.y)
-        return tile
-    return null
-  }
+
   componentDidMount() {
+    this.ismounted = true
+    this.newGame()
+
     window.onkeydown = (e: any) => {
       if((e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40) && this.state.transitionFinished) {
         let colOrRow : boolean, reversed : boolean, direction: string
+        this.setState({endFadeInAnimation: true})
 
         if(e.keyCode == 37) { //left
           colOrRow = true
@@ -106,36 +327,65 @@ class Game extends Component<Props> {
 
         let moved = this.compareTiles(newTiles, crows.flat())
         if(moved) {
-          let newTile = this.getRandomFields(this.getNonOccupiedFields(newTiles.filter(tile => {
+
+          let dicedTiles = this.getRandomFields(this.getNonOccupiedFields(newTiles.filter(tile => {
             if(tile.afterAnimate != 0) return tile
-          }).map(tile => [tile.x, tile.y])), 1)[0]
+          }).map(tile => [tile.x, tile.y])), this.state.number_of_new)
+
+          let gameOver = false, win = false
 
           for(let i=0; i<newTiles.length; i++) {
             newTiles[i].transformDirection = direction
-            if(newTiles[i].x == newTile[0] && newTiles[i].y == newTile[1]) {
-              let newTileValue = this.getNewTileValue()
-              newTiles[i].afterAnimate = newTileValue
+            for(let dicedTile of dicedTiles) {
+              if(typeof dicedTile == 'undefined') {
+                gameOver = true
+                break
+              }
+              if(newTiles[i].x == dicedTile[0] && newTiles[i].y == dicedTile[1]) {
+                let newTileValue = this.getNewTileValue()
+                newTiles[i].afterAnimate = newTileValue
+              }
             }
+            if(gameOver) break
           }
+          
+          let newTiles_2dim = this.fromOneToTwoDimArr(newTiles)
 
-          this.setState({tiles: newTiles, transitionFinished: false})
+          if(!gameOver) if(this.checkForClutch(newTiles_2dim)) gameOver = true
+          for(let tile of newTiles) if(tile.afterAnimate == this.state.winning_tile && !this.state.playMore) win = true
+
+          this.setState({
+            tiles: newTiles_2dim, 
+            transitionFinished: false, 
+            animMutex: false,
+            gameOver,
+            win
+          })
         }
       }
     }
   }
+  fromOneToTwoDimArr(a: Tile[]) : Tile[][]{
+    let b = []
+    for(let i=0; i<this.state.width; i++) b.push([])
+    for(let c of a) b[c.x].push(c)
+    return b
+  }
   checkForClutch(a: Tile[][]) {
     let width = a.length,
     height = a[0].length
+
     for(let i=0; i<width; i++)
-      for(let j=0; j<height-1; j++)
+      for(let j=0; j<height-1; j++){
         if(a[i][j].afterAnimate == a[i][j+1].afterAnimate || 
       a[i][j].afterAnimate == 0 || a[i][j+1].afterAnimate == 0) return false
-
+    }
     for(let j=0; j<height; j++)
-      for(let i=0; i<width-1; i++)
-          if(a[i][j].afterAnimate == a[i+1][j].afterAnimate &&
-            a[i][j].afterAnimate != 0) return false
-    
+      for(let i=0; i<width-1; i++) { 
+        if(a[i][j].afterAnimate == a[i+1][j].afterAnimate &&
+        a[i][j].afterAnimate != 0) return false
+      }
+         
     return true
   }
 
@@ -165,11 +415,6 @@ class Game extends Component<Props> {
       }
     }
     return a
-  }
-
-  getNewTileValue() : number{
-    let r = Math.random()
-    return r < 0.2 ? 4 : 2
   }
 
   countNewGamePosition(tileArray: Array<Tile[]>, reversed: boolean) {
@@ -213,7 +458,7 @@ class Game extends Component<Props> {
           n.splice(j, 1) //[2, 2] 4 [8, 8] 8 <[2, 2] 4 8 [8, 8]>
           j--
         }
-        else if(n[j][0]) n[j] = parseInt(n[j][0]) + parseInt(n[j][1]) //4 4 16 8 <4 4 8 16>
+        else if(n[j][0]) n[j] = parseFloat(n[j][0]) + parseFloat(n[j][1]) //4 4 16 8 <4 4 8 16>
       }
       for(let j=0; j<zeroCounter; j++) r ? n.unshift(0) : n.push(0) //4 4 16 8 0 0 0 0 0 <0 0 0 0 0 4 4 8 16>
 
@@ -244,7 +489,7 @@ class Game extends Component<Props> {
     for(let i = 0; i < (colOrRow ? this.state.width : this.state.height); i++)
       colrow.push([])
 
-    this.state.tiles.map(tile => {
+    this.state.tiles.flat().map(tile => {
       colOrRow ? colrow[tile.x].push(tile) : colrow[tile.y].push(tile)
     })
     return colrow
@@ -262,6 +507,11 @@ class Game extends Component<Props> {
     }
     return cleanFields
   }
+  getNewTileValue() : number{
+    let r = Math.random()
+    return r < 0.2 ? this.state.content_of_new_1 : this.state.content_of_new_2
+  }
+
   getRandomFields(arrayOfFields: Array<number[]>, amount: number) {
     let arrayOfChosen = []
     for(let i = 0; i < amount; i++) {
@@ -273,80 +523,115 @@ class Game extends Component<Props> {
   }
   newGame() {
     let fieldsToBegin = this.getRandomFields(this.getNonOccupiedFields([]), 2),
-        fields: Array<Tile> = []
+        fields: Array<Tile[]> = []
 
     for(let i = 0; i < this.state.width; i++) {
-      for(let j = 0; j < this.state.height; j++)
-        fields.push({
+      fields.push([])
+      for(let j = 0; j < this.state.height; j++) {
+        let content = 0
+        for(let field of fieldsToBegin)
+          if(field[0] == i && field[1] == j) content = this.getNewTileValue()
+
+        fields[i].push({
           x: i,
           y: j,
-          content: (() => {
-            for(let field of fieldsToBegin)
-              if(field[0] == i && field[1] == j) return this.getNewTileValue()
-            return 0
-          })()
+          content,
+          afterAnimate: content
         })
+      }
     }
+
     this.setState({
-      tiles: fields
+      tiles: fields,
+      gameOver: false,
+      win: false,
+      playMore: false
     })
-    this.state = {
-      ...this.state,
-      tiles: fields
-    }
+  }
+
+  setPlayMore() {
+    this.setState({playMore: true})
+  }
+
+  win() {
+    this.state.winFunc()
+    this.setState({playMore: true})
+  }
+
+  gameOver() {
+    this.state.gameOverFunc()
   }
 
   render() {
     return(<>
-    <table className="game">
-      {
-        Array.from(Array(this.state.height).keys()).map(i => {
-          return(
-            <tr className="game_row">
-              {Array.from(Array(this.state.width).keys()).map(j => {
-                  let matchTile = this.findTile(i, j) 
-                  return(
-                    <td className="game_field" style={{
-                        width: `min(110px, 50vw / ${this.state.width})`,
-                        height: `min(110px, 50vw / ${this.state.width})`
-                    }}>
-                      {<div className={"game_tile show_no_transition tile_0"}></div>}
-                      
-                      {
-                        <div className={ClassNames({
-                          game_tile: true,
-                          [`tile_${matchTile.content}`]: true,
-                          show: !matchTile.destinationPoint && matchTile.content !== 0,
-                          show_no_transition: matchTile.content !== 0
-                        })} {...(matchTile.hasToBeAnimated ? {
-                          style: {
-                            transition: `transform 200ms linear`,
+    <button className="resetButton" onClick={() => {
+      this.newGame()
+    }}>Reset</button>
 
-                            transform: `translate${['L', 'R'].includes(matchTile.transformDirection) ? 'X' : 'Y'}(${['U', 'L'].includes(matchTile.transformDirection) ? `max(calc(-110px * ${matchTile.tilesCount}) ,${matchTile.tilesCount} * (50vw / ${-this.state.width}))` : `min(calc(110px * ${matchTile.tilesCount}), ${matchTile.tilesCount} * (50vw / ${this.state.width})`}`
-                          }
-                        } : {})}
-                        onTransitionEnd={() => this.setState((prev : State) => ({
-                          tiles: [
-                            ...prev.tiles.map(tile => {
-                              if(tile.x == matchTile.x && tile.y == matchTile.y) {
-                                tile.hasToBeAnimated = false
+    <table>
+      <tbody className="game">
+        {
+          this.state.tiles.map(row => {
+            return(
+              <tr className="game_row">
+                {row.map(tile => {
+                    return(
+                      <td className="game_field" style={{
+                          width: `min(110px, 50vw / ${this.state.width})`,
+                          height: `min(110px, 50vw / ${this.state.width})`
+                      }}>
+
+                        {<div className={"game_tile show_no_transition tile_0"}></div>}
+                        {
+                          <div className={ClassNames({
+                            game_tile: true,
+                            [`tile_${tile.content}`]: true,
+                            show: !tile.destinationPoint && tile.content,
+                            show_no_transition: tile.content,
+                            end_fade_in: this.state.endFadeInAnimation
+                          })} {...(tile.hasToBeAnimated ? {
+                            style: {
+                              transition: `transform 200ms linear`,
+
+                              transform: `translate${['L', 'R'].includes(tile.transformDirection) ? 'X' : 'Y'}(${['U', 'L'].includes(tile.transformDirection) ? `max(calc(-110px * ${tile.tilesCount}) ,${tile.tilesCount} * (50vw / ${-this.state.width}))` : `min(calc(110px * ${tile.tilesCount}), ${tile.tilesCount} * (50vw / ${this.state.width})`}`
+                            }
+                          } : {})} 
+                          onTransitionEnd={() => {   
+                              this.setState((prev : State) => ({
+                                tiles: [
+                                  ...prev.tiles.map(row => {
+                                    return row.map(tile => {
+                                      if(tile.x == tile.x && tile.y == tile.y) {
+                                        tile.hasToBeAnimated = false
+                                      }
+                                      tile.content = tile.afterAnimate
+                                      tile.transitionFinished = true
+                                      return tile
+                                    })
+                                  })
+                                ],
+                                transitionFinished: true,
+                                endFadeInAnimation: false,
+                              }))                  
+                              if(!this.state.animMutex) {
+                                this.setState({animMutex: true})
+                                if(this.state.gameOver) this.gameOver()
+                                if(this.state.win && !this.state.playMore) this.win()
                               }
-                              tile.content = tile.afterAnimate
-                              tile.transitionFinished = true
-                              return tile
-                            })
-                          ],
-                          transitionFinished: true
-                        }))}
-                        > {matchTile.content}</div>
-                      }
-                    </td>
-                  )
-              })}
-            </tr>
-          )
-        })
-      }
-    </table></>)
+                              
+                            }
+                          }>{ tile.content ? tile.content : '' }</div>
+                        }
+                        
+                      </td>
+                    )
+                })}
+              </tr>
+            )
+          })
+        }
+      </tbody>
+    </table>
+    </>)
   }
 }

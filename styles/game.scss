@@ -1,4 +1,9 @@
-main *:not(style) {
+@font-face {
+    font-family: 'Game-Font-7';
+    src: url('./fonts/game_font_7.ttf');
+}
+
+main *{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6,11 +11,174 @@ main *:not(style) {
 
 $gameBcg: #5C9099;
 
+@keyframes title-anim {
+    0% {font-size: 80px;}
+    50% {font-size: 70px;}
+    100% {font-size: 80px;}
+}
+.resetButton {
+    position: relative;
+    border: none;
+    background-color: unset;
+    font-size: 30px;
+    cursor: pointer;
+    top: 20px;
+    left: 90vw;
+    padding-bottom: 5px;
+    transition: border-bottom 200ms !important;
+    border-bottom: #fff 2px solid; 
+    &:hover {
+        border-bottom: black 2px solid; 
+    }
+}
+.returnButton {
+    border: none;
+    background-color: unset;
+    font-size: 30px;
+    cursor: pointer;
+    top: 20px;
+    padding-bottom: 5px;
+    left: 20px;
+    transition: border-bottom 200ms !important;
+    border-bottom: #fff 2px solid; 
+    &:hover {
+        border-bottom: black 2px solid; 
+    }
+}
+.menu {
+    display: flex;
+    flex-direction: row !important;
+    width: 100vw;
+    height: 100vh;
+
+    &>p {
+        margin-right: 5vw;
+        width: 300px;
+    }
+}
+.main_menu {
+    width: 40vw;
+    max-width: 350px;
+    flex-direction: column;
+
+    border: black 2px solid;
+    padding: 40px 80px;
+    border-radius: 5%;
+
+    span {
+        height: 100px;
+        title {
+            animation: title-anim 2s infinite;
+            margin-bottom: 20px;
+            font-family: 'Game-Font-7';
+        }
+    }
+    p {
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        word-wrap: none;
+        cursor: pointer;
+        padding-bottom: 10px;
+        border-bottom: #fff 1.5px solid;
+        transition: border-bottom 200ms;
+        &:hover {
+            border-bottom: rgb(107, 107, 226) 1.5px solid;
+        }
+    }
+}
+
+.customize_panel {
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    text-align: center;
+
+    title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    table{
+        margin: 30px 0;
+        tbody {
+            flex-direction: column;
+            font-size: 14px;
+            text-align: left;
+            .text_td {
+                justify-content: unset;
+                width: 40vw;
+            }
+            .input_td {
+                width: 10vw;
+
+                input {
+                    position: relative;
+                    border: none;
+                    border-bottom: #555 solid 1.5px;
+                    margin: 10px;
+                    padding: 5px;
+                    width: 40px;
+                    text-align: center;
+            
+                    transition: border-bottom 300ms,
+                                color 300ms,
+                                background-color 300ms;
+            
+                    &:focus {
+                        border-bottom: rgb(107, 107, 226) solid 1.5px;
+                        background-color: #eee;
+                        color: rgb(107, 107, 226)
+                    }
+                }
+            }
+        }
+    }
+    .form_errors {
+        font-size: 12px;
+        color: rgb(230, 18, 18);
+        flex-direction: column;
+        justify-content: flex-end !important;
+        text-align: left;
+    }
+    button {
+        border: none;
+        padding: 30px;
+        padding-bottom: 10px;
+        background-color: unset;
+        cursor: pointer;
+        font-size: 20px;
+        border-bottom: #fff 1.5px solid;
+        transition: border-bottom 200ms;
+        &:hover {
+            border-bottom: rgb(107, 107, 226) 1.5px solid;
+        }
+    }
+}
+.top {
+    z-index: 2 !important;
+}
+.hide_menu_routes {
+    position: absolute;
+    z-index: -1;
+    opacity: 0%;
+    transition: opacity 200ms;
+}
+.show_menu_routes {
+    position: absolute;
+    z-index: 1;
+    opacity: 100%;
+}
+
 .game {
     flex-direction: column;
     background-color: $gameBcg;
     border-radius: 5%;
     padding: 2vw;
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
 }
 .game_field {
     border: $gameBcg solid 6px;
@@ -31,12 +199,30 @@ $gameBcg: #5C9099;
             transform 0s;
 }
 .show {
-    transition: opacity 500ms;
+    transition: opacity 300ms;
+}
+
+main {
+    display: flex;
+    .hide_menu_routes {
+        flex-direction: column;
+    }
+}
+form {
+    flex-direction: column;
+    .form_section {
+        flex-direction: column;
+    }  
+    .input_section {
+        flex-direction: row;
+    }
 }
 .show_no_transition {
     opacity: 100%;
 }
-
+.end_fade_in {
+    transition: opacity 0s;
+}
 .tile_0 {
     z-index: 1 !important;
     background-color: #81ACB1;
