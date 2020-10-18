@@ -52,7 +52,7 @@ $gameBcg: #5C9099;
     height: 100vh;
 
     &>p {
-        margin-right: 5vw;
+        margin-right: 10vw;
         width: 300px;
     }
 }
@@ -86,6 +86,25 @@ $gameBcg: #5C9099;
             border-bottom: rgb(107, 107, 226) 1.5px solid;
         }
     }
+}
+
+.credits {
+    title {
+        animation: title-anim 2s infinite;
+        margin-bottom: 20px;
+        font-family: 'Game-Font-7';
+    }
+    a {
+        color: rgb(107, 107, 226);
+    }
+    .a_embded {
+        margin-left: 5px;
+    }
+
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
 }
 
 .customize_panel {

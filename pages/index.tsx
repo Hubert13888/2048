@@ -17,7 +17,7 @@ interface StateMenu {
 
 export default class Home extends Component {
   state : StateMenu = {
-    menuPosition: 'customize',
+    menuPosition: 'main-menu',
     game: [],
     inputs: {
       width: 4,
@@ -199,6 +199,7 @@ generateInput(name: string) {
       </div>
 
       <div className={ClassNames({
+        credits: true,
         hide_menu_routes: true,
         show_menu_routes: this.state.menuPosition == 'credits'
       })}>
@@ -206,7 +207,7 @@ generateInput(name: string) {
         <p>Game made by</p>
         <a href="http://hubert-siwczynski.000webhostapp.com" target="_blank">Hubert13888</a>
         <p>using React.</p>
-        <p>Based on the same title game made by Gabriele Cirulli</p>
+        <p>Based on the same title game made by<a className="a_embded" href="https://play.google.com/store/apps/details?id=com.androbaby.game2048&hl=pl" target="_blank">Gabriele Cirulli</a></p>
       </div>
     </main>)
   }
