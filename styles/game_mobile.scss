@@ -1,0 +1,51 @@
+$gameBcg: #5C9099;
+
+@media only screen and (max-width: 600px) {
+  .menu {
+    //flex-direction: column;
+    &>p {
+      display:none;
+    }
+  }
+  .main_menu {
+    max-width: 100vw !important;
+    width: 90vw;
+
+    padding: 5vh 9vw;
+  }
+  .game_field {
+    border: $gameBcg solid 2px;
+    position: relative;
+  }
+  .game_tile {
+    width: 100%;
+    height: 100%;
+    border-radius: 3%;
+    font-size: 6vw;
+    transition: 
+            opacity 0s,
+            transform 0s;
+  }
+  .customize_panel {
+    table{ 
+      tr{
+        margin-right: 50px;
+        td {
+          margin: 0 30px;
+        }
+      }
+    }
+  }
+  .credits {
+    title {
+      animation: unset;
+      font-size: 80px;
+    }
+    a {
+      margin-top: 10px;
+    } 
+    * {
+      flex-direction: column;
+    }
+  }
+}
